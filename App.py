@@ -10,7 +10,6 @@ silos_data = [{'percent': 0, 'quantity': 0} for _ in range(15)]
 
 # Modbus client
 client = ModbusSerialClient(
-    method='rtu',
     port='COM5',  # ⚠️ Cambia con la tua COM
     baudrate=9600,
     bytesize=8,

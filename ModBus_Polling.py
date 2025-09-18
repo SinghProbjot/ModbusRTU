@@ -5,11 +5,10 @@ from pymodbus.client import ModbusSerialClient
 import time
 
 client = ModbusSerialClient(
-    method='rtu',
     port='COM5',  
     baudrate=115200,
     bytesize=8,
-    parity='Even',
+    parity='E',
     stopbits=1,
     timeout=1
 )
