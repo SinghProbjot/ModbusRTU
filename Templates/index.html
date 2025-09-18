@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Silo</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>🛢️ Monitoraggio Silos</h1>
+    <div class="silos-container" id="silos">
+        <!-- I silo saranno generati via JavaScript -->
+    </div>
+
+    <script>
+    function renderSilos(data) {
+        const container = document.getElementById("silos");
+        container.innerHTML = "";
+        data.forEach((silo, index) => {
+            const html = `
+                <div class="silo">
+                    <div class="silo-body">
+                        <div class="silo-fill" style="height: ${silo.percent}%"></div>
+                    </div>
+                    <div class="silo-label">Silo ${index + 1}</div>
+                    <div class="silo-data">${silo.percent}%<br>${silo.quantity} kg</div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+
+    async function updateSilos() {
+        const res = await fetch("/api/data");
+        const data = await res.json();
+        renderSilos(data);
+    }
+
+    setInterval(updateSilos, 3000);
+    updateSilos();
+    </script>
+</body>
+</html>

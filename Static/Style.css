@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f8f9fa;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+}
+
+.silos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.silo {
+    width: 80px;
+}
+
+.silo-body {
+    height: 200px;
+    width: 60px;
+    border: 2px solid #555;
+    background: #eee;
+    position: relative;
+    margin: 0 auto;
+}
+
+.silo-fill {
+    background: #3c8dbc;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.silo-label {
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.silo-data {
+    font-size: 0.9em;
+    color: #555;
+}
