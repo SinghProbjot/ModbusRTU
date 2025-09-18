@@ -10,10 +10,10 @@ silos_data = [{'percent': 0, 'quantity': 0} for _ in range(15)]
 
 # Modbus client
 client = ModbusSerialClient(
-    port='COM5',  # ⚠️ Cambia con la tua COM
-    baudrate=9600,
+    port='/dev/ttyUSB0',  
+    baudrate=115200,
     bytesize=8,
-    parity='N',
+    parity='E',
     stopbits=1,
     timeout=1
 )
@@ -27,7 +27,7 @@ def poll_modbus():
 
         for i in range(15):  # Slave 1 → 15
             slave_id = i + 1
-            response = client.read_holding_registers(10, 1, unit=slave_id)
+            response = client.read_holding_registers(10, count=1, device_id=slave_id)
             if not response.isError():
                 value = response.registers[0]  # es: quantità in kg
                 max_capacity = 1000  # capacità massima del silo
