@@ -57,7 +57,7 @@ def modbus_polling_loop():
 
                     if hasattr(response, 'registers'):
                         value = response.registers[0]
-                        percent = min(100, max(0, int((value / 2000) * 100)))
+                        percent = min(100, max(0, int((value / 28000) * 100)))
                         #percent = int((value / 2000) * 100)
                         #percent = max(0, min(100, percent))
 
