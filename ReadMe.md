@@ -40,7 +40,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 ├── LOG/ # Rotated log files (polling history)
 ├── update.sh # Git pull + auto-restart (optional)
 └── README.md
-
+```
 
 ---
 
@@ -95,19 +95,19 @@ git clone https://github.com/SinghProbjot/ModbusRTU
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
+```
 Requirements:
-
+```bash
 - Flask
 
 - pymodbus
 
 - pyserial 
-
+```
 ### 2. Run the App
 ```bash
 python3 App.py
-
+```
 Or expose via gunicorn and systemd for production.
 
 - 🚀 Future Features (WIP)
