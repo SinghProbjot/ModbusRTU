@@ -29,3 +29,8 @@ dist/
 # File di sistema
 .DS_Store
 Thumbs.db
+
+# DB Connection
+secret.key
+config.json
+
