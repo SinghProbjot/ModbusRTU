@@ -42,7 +42,7 @@ try:
         except Exception as e:
             print(f"❌ Slave {slave_id}: nessuna risposta o errore → {e}")
 
-        time.sleep(0.2)  # pausa minima tra richieste
+        time.sleep(0.2) 
 
 finally:
     client.close()

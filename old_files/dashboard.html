@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Silo</title>
+    <meta http-equiv="refresh" content="5"> <!-- Aggiorna ogni 5 sec -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+        }
+        .silo {
+            display: inline-block;
+            width: 100px;
+            height: 200px;
+            margin: 15px;
+            border: 2px solid #333;
+            background: #fff;
+            position: relative;
+        }
+        .fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #4caf50;
+        }
+        .offline .fill {
+            background: #aaa;
+        }
+        .label {
+            margin-top: 10px;
+        }
+        .offline .label {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Silo (RTU)</h1>
+
+    <div>
+        {% for id, data in silo_data.items() %}
+            <div class="silo {% if not data.online %}offline{% endif %}">
+                <div class="fill" style="height: {{ data.percent | default(0) }}%;"></div>
+                <div class="label">
+                    <strong>Silo {{ id }}</strong><br>
+                    {{ data.percent or "N/A" }}%<br>
+                    {{ data.value or "N/A" }}<br>
+                    {% if data.last_ok %} <small>Ultimo OK: {{ data.last_ok }}</small> {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

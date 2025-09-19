@@ -3,36 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Silo</title>
-    <meta http-equiv="refresh" content="5"> <!-- Aggiorna ogni 5 sec -->
+    <meta http-equiv="refresh" content="5">
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f4;
             text-align: center;
         }
-        .silo {
+        .silo-container {
             display: inline-block;
+            margin: 15px;
+            vertical-align: top;
+        }
+        .silo {
             width: 100px;
             height: 200px;
-            margin: 15px;
             border: 2px solid #333;
             background: #fff;
             position: relative;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
         }
         .fill {
             position: absolute;
             bottom: 0;
             width: 100%;
-            background: #4caf50;
         }
-        .offline .fill {
-            background: #aaa;
+        .fill.green { background: #4caf50; }
+        .fill.yellow { background: #ffeb3b; }
+        .fill.red { background: #f44336; }
+        .offline .fill { background: #aaa; }
+
+        .percent-label {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
         }
+
         .label {
-            margin-top: 10px;
+            font-size: 14px;
         }
-        .offline .label {
+
+        .offline .percent-label {
             color: red;
+        }
+
+        .silo-name {
+            font-weight: bold;
+        }
+
+        .value-row {
+            font-size: 13px;
         }
     </style>
 </head>
@@ -41,13 +65,29 @@
 
     <div>
         {% for id, data in silo_data.items() %}
-            <div class="silo {% if not data.online %}offline{% endif %}">
-                <div class="fill" style="height: {{ data.percent | default(0) }}%;"></div>
+            <div class="silo-container">
+                <div class="silo {% if not data.online %}offline{% endif %}">
+                    {% if data.online %}
+                        {% if data.percent > 50 %}
+                            <div class="fill green" style="height: {{ data.percent }}%;"></div>
+                        {% elif data.percent > 20 %}
+                            <div class="fill yellow" style="height: {{ data.percent }}%;"></div>
+                        {% else %}
+                            <div class="fill red" style="height: {{ data.percent }}%;"></div>
+                        {% endif %}
+                    {% else %}
+                        <div class="fill" style="height: 0%;"></div>
+                    {% endif %}
+                    <div class="percent-label">{{ data.percent or "N/A" }}%</div>
+                </div>
                 <div class="label">
-                    <strong>Silo {{ id }}</strong><br>
-                    {{ data.percent or "N/A" }}%<br>
-                    {{ data.value or "N/A" }}<br>
-                    {% if data.last_ok %} <small>Ultimo OK: {{ data.last_ok }}</small> {% endif %}
+                    <div class="silo-name">Silo {{ id }}</div>
+                    <div class="value-row">{{ data.value or "N/A" }}</div>
+                    <div class="value-row">
+                        {% if data.last_ok %}
+                            <small>{{ data.last_ok }}</small>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% endfor %}
