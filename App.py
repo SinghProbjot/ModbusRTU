@@ -7,6 +7,10 @@ from logging.handlers import RotatingFileHandler
 from threading import Lock
 import os
 import gc
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+
 
 # === CONFIGURAZIONE CARTELLA LOG ===
 LOG_DIR = "LOG"
@@ -87,7 +91,7 @@ def modbus_polling_loop():
                                 silo_data[slave_id]["value"] = value
                                 silo_data[slave_id]["percent"] = percent
                                 silo_data[slave_id]["online"] = True
-                                silo_data[slave_id]["last_ok"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                                silo_data[slave_id]["last_ok"] = datetime.now(ZoneInfo("Europe/Rome")).strftime("%Y-%m-%d %H:%M:%S")     #time.strftime("%Y-%m-%d %H:%M:%S")
 
                             logging.info(f"Slave {slave_id} → Valore: {value}, Percentuale: {percent}%")
                         else:
