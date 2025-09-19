@@ -32,6 +32,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 ---
 
 ## 🧱 Architecture
+<pre lang="markdown"><code>```
 .
 ├── App.py # Main application (Flask + Modbus polling)
 ├── templates/
