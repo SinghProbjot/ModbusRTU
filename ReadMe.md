@@ -1,3 +1,21 @@
+
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.10+-blue?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/flask-2.x-black?logo=flask" alt="Flask">
+  <img src="https://img.shields.io/badge/pymodbus-3.x-orange?logo=modbus" alt="pymodbus">
+  <img src="https://img.shields.io/badge/pyserial-enabled-blueviolet" alt="pyserial">
+  <img src="https://img.shields.io/badge/status-in%20progress-yellow" alt="Project Status">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+</p>
+
+<p align="center">
+  <strong>Real-time industrial dashboard for Modbus RTU silo monitoring</strong><br>
+  Built with Python, Flask & pymodbus • Logs & visualizes live data • Ready for production
+</p>
+
+---
+
+
 # 🏗️ Modbus RTU Comunication and Silo Dashboard
 
 A Python-based application for **polling silo data via Modbus RTU** and displaying the values in **real-time through a web-based dashboard**.
@@ -8,7 +26,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ## 📸 Preview
 
-![Dashboard Preview](preview.png)
+![Dashboard Preview](old_files/silosdashboard.JPG)
 
 ---
 
@@ -32,6 +50,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 ---
 
 ## 🧱 Architecture
+````
 <pre lang="markdown"><code>```
 .
 ├── App.py # Main application (Flask + Modbus polling)
@@ -42,6 +61,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 └── README.md
 </code>
 ```
+````
 
 ---
 
@@ -111,7 +131,7 @@ python3 App.py
 ```
 Or expose via gunicorn and systemd for production.
 
-- 🚀 Future Features (WIP)
+## 🚀 Future Features (WIP)
 
 - 🗃️ Write valid readings to Microsoft SQL Server (DB integration)
 
@@ -121,7 +141,7 @@ Or expose via gunicorn and systemd for production.
 
 - 🔐 Authenticated access (optional)
 
-🧑‍💻 Developer Notes
+## 🧑‍💻 Developer Notes
 
 - All data is stored in RAM (silo_data dictionary)
 
@@ -133,28 +153,26 @@ Or expose via gunicorn and systemd for production.
 
 - Safe multithreading with shared silo_data state
 
-📁 Version Control / Deployment
+## 📁 Version Control / Deployment
 
 - Git repo is safe for regular updates (venv/, LOG/, etc. are ignored via .gitignore)
 
-- Includes optional update.sh script:
+ - Includes optional update.sh script:
 
--- git pull
+    - git pull
 
--- Restart service (if under systemd)
+    - Restart service (if under systemd)
 
 - Recommended deployment with:
 
--- gunicorn + systemd
+    - gunicorn + systemd
 
--- modbus-updater.service + timer (hourly git sync)
+    - modbus-updater.service + timer (hourly git sync)
 
 
-✍️ Author
+## ✍️ Author
 
 Developed with ❤️ by Probjot Singh
-
-Industrial automation & full-stack development
 
 ✉️ probjot2000@gmail.com
 
