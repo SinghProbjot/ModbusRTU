@@ -10,6 +10,19 @@ import gc
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+# === BANNER DI AVVIO ===
+print("""
+===============================================
+🛰️  MODBUS RTU SILO MONITORING DASHBOARD
+===============================================
+Author      : Probjot Singh
+Version     : 1.0.3
+Description : Flask app that polls 15 Modbus RTU slave devices
+              and serves a live dashboard via web interface.
+
+📅 Start Time: {start_time}
+===============================================
+""".format(start_time=datetime.now(ZoneInfo("Europe/Rome")).strftime("%Y-%m-%d %H:%M:%S")))
 
 
 # === CONFIGURAZIONE CARTELLA LOG ===
