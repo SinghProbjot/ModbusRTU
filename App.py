@@ -62,10 +62,10 @@ def modbus_polling_loop():
     )
 
     if not client.connect():
-        logging.error("❌ Impossibile connettersi a /dev/ttyUSB0")
+        logging.error("Impossibile connettersi a /dev/ttyUSB0")
         return
 
-    logging.info("🔁 Avviato polling Modbus RTU ogni 30 secondi.")
+    logging.info("Avviato polling Modbus RTU ogni 30 secondi.")
 
     try:
         while True:
@@ -89,20 +89,20 @@ def modbus_polling_loop():
                                 silo_data[slave_id]["online"] = True
                                 silo_data[slave_id]["last_ok"] = time.strftime("%Y-%m-%d %H:%M:%S")
 
-                            logging.info(f"✅ Slave {slave_id} → Valore: {value}, Percentuale: {percent}%")
+                            logging.info(f"Slave {slave_id} → Valore: {value}, Percentuale: {percent}%")
                         else:
                             with data_lock:
                                 silo_data[slave_id]["online"] = False
-                            logging.warning(f"⚠️  Slave {slave_id} ha restituito un valore fuori range: {value}")
+                            logging.warning(f"Slave {slave_id} ha restituito un valore fuori range: {value}")
                     else:
                         with data_lock:
                             silo_data[slave_id]["online"] = False
-                        logging.warning(f"⚠️  Slave {slave_id} ha risposto ma senza dati validi")
+                        logging.warning(f"Slave {slave_id} ha risposto ma senza dati validi")
 
                 except Exception as e:
                     with data_lock:
                         silo_data[slave_id]["online"] = False
-                    logging.error(f"❌ Slave {slave_id} → Errore: {e}")
+                    logging.error(f"Slave {slave_id} → Errore: {e}")
 
                 time.sleep(0.05)  # Breve pausa tra le richieste
 
@@ -129,4 +129,4 @@ polling_thread.start()
 
 # === AVVIO FLASK ===
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, threaded=True)

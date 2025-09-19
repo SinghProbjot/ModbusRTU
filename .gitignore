@@ -1,0 +1,31 @@
+# .gitignore
+
+# Ambiente virtuale
+venv/
+.env/
+
+# File Python compilati
+__pycache__/
+*.pyc
+*.pyo
+
+# Log e output
+*.log
+LOG/
+server.log
+nohup.out
+
+# File editor temporanei
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Build Python
+build/
+dist/
+*.egg-info/
+
+# File di sistema
+.DS_Store
+Thumbs.db
