@@ -40,6 +40,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 ├── LOG/ # Rotated log files (polling history)
 ├── update.sh # Git pull + auto-restart (optional)
 └── README.md
+</code>
 ```
 
 ---
