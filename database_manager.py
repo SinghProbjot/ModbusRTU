@@ -99,35 +99,36 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f" Errore connessione SQL Server: {e}")
             raise
+
+    def _map_slave_to_erp_code(self, slave_id: int) -> str:
+        """Mappa ID numerico slave a codice ERP"""
+        erp_mapping = {
+            1: "S01", 2: "S02", 3: "S03", 4: "S04", 5: "S05",
+            6: "S06", 7: "S07", 8: "S08", 9: "S09", 10: "S10",
+            11: "S11", 12: "S12", 13: "S13", 14: "S14", 15: "S15"
+        }
+        return erp_mapping.get(slave_id, f"S{slave_id:02d}")
     
     def _create_tables(self):
-        """Crea tabelle se non esistono"""
+        """Crea tabelle se non esistono - SOLO VERIFICA"""
         table_name = self.config.get('table_name', 'silo_monitoring')
         
-        # Schema semplificato: solo ID silo, quantità e timestamp
-        create_sql = f"""
+        # Solo verifica che la tabella esista (non la crea)
+        check_sql = f"""
         IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='{table_name}' AND xtype='U')
         BEGIN
-            CREATE TABLE {table_name} (
-                id_silo INT NOT NULL PRIMARY KEY,
-                quantita INT NULL,
-                ultimo_aggiornamento DATETIME2 DEFAULT GETDATE()
-            );
-            
-            CREATE NONCLUSTERED INDEX idx_{table_name}_timestamp 
-            ON {table_name}(ultimo_aggiornamento DESC);
+            RAISERROR('Tabella {table_name} non trovata! Creala manualmente con SSMS.', 16, 1)
         END
         """
         
         try:
             cursor = self.connection.cursor()
-            cursor.execute(create_sql)
-            self.connection.commit()
+            cursor.execute(check_sql)
             cursor.close()
-            self.logger.info(f" Tabella {table_name} creata/verificata")
+            self.logger.info(f" Tabella {table_name} verificata")
         except Exception as e:
-            self.logger.error(f" Errore creazione tabella: {e}")
-            self.connection.rollback()
+            self.logger.error(f" Tabella non trovata: {e}")
+            self.logger.error(" Crea manualmente la tabella con SSMS usando lo schema fornito")
             raise
     
     def _get_connection(self):
@@ -183,7 +184,7 @@ class DatabaseManager:
                 time.sleep(5)  # Pausa prima di riprovare
     
     def _write_batch(self, records: List[DatabaseRecord]):
-        """Scrive un batch di record nel database con MERGE (UPSERT)"""
+        """Scrive un batch di record nel database (sempre INSERT)"""
         if not records:
             return
         
@@ -193,39 +194,36 @@ class DatabaseManager:
             conn = self._get_connection()
             cursor = conn.cursor()
             
-            # SQL MERGE per SQL Server - aggiorna se esiste, inserisce se non esiste
-            merge_sql = f"""
-            MERGE {table_name} AS target
-            USING (SELECT ? AS id_silo, ? AS quantita, ? AS ultimo_aggiornamento) AS source
-            ON target.id_silo = source.id_silo
-            WHEN MATCHED THEN
-                UPDATE SET 
-                    quantita = source.quantita,
-                    ultimo_aggiornamento = source.ultimo_aggiornamento
-            WHEN NOT MATCHED THEN
-                INSERT (id_silo, quantita, ultimo_aggiornamento)
-                VALUES (source.id_silo, source.quantita, source.ultimo_aggiornamento);
+            # SQL: INSERT con codici ERP
+            insert_sql = f"""
+            INSERT INTO {table_name} 
+                (Cd_xMGSilo, Qta, ultimo_aggiornamento) 
+            VALUES (?, ?, ?)
             """
             
-            # Prepara dati per batch - solo record online con valore valido
             successful_writes = 0
             for record in records:
-                if record.online and record.value is not None:
-                    try:
-                        cursor.execute(merge_sql, (
-                            record.slave_id,
-                            record.value,
-                            record.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                try:
+                    # Scrivi SOLO se il silo è online e ha un valore valido
+                    if record.online and record.value is not None:
+                        # Converti ID numerico in codice ERP
+                        erp_code = self._map_slave_to_erp_code(record.slave_id)
+                        
+                        cursor.execute(insert_sql, (
+                            erp_code,           # Cd_xMGSilo (S01, S02, ecc.)
+                            record.value,       # Qta  
+                            record.timestamp.strftime('%Y-%m-%d %H:%M:%S')  # ultimo_aggiornamento
                         ))
                         successful_writes += 1
-                    except Exception as e:
-                        self.logger.error(f" Errore scrittura record slave {record.slave_id}: {e}")
+                    
+                except Exception as e:
+                    self.logger.error(f" Errore scrittura record slave {record.slave_id}: {e}")
             
             conn.commit()
             cursor.close()
             
             if successful_writes > 0:
-                self.logger.info(f" Aggiornati {successful_writes} record nel database")
+                self.logger.info(f" Inseriti {successful_writes} record nel database (codici ERP)")
             
         except Exception as e:
             self.logger.error(f" Errore scrittura batch database: {e}")
@@ -257,7 +255,7 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f" Errore accodamento dati: {e}")
     
-    def get_recent_data(self, slave_id: int = None, hours: int = 24) -> List[Dict]:
+    def get_recent_data(self, slave_id: int = None, hours: int = 24, limit: int = 1000) -> List[Dict]:
         """Recupera dati recenti dal database per grafici"""
         if not self.config.get('enabled', False):
             return []
@@ -269,29 +267,32 @@ class DatabaseManager:
             cursor = conn.cursor()
             
             if slave_id:
+                # Converti ID numerico in codice ERP per la query
+                erp_code = self._map_slave_to_erp_code(slave_id)
                 sql = f"""
-                SELECT id_silo, quantita, ultimo_aggiornamento 
+                SELECT Cd_xMGSilo, Qta, ultimo_aggiornamento 
                 FROM {table_name} 
-                WHERE id_silo = ?
+                WHERE Cd_xMGSilo = ? AND ultimo_aggiornamento >= DATEADD(HOUR, -?, GETDATE())
                 ORDER BY ultimo_aggiornamento DESC
                 """
-                cursor.execute(sql, (slave_id,))
+                cursor.execute(sql, (erp_code, hours))
             else:
                 sql = f"""
-                SELECT id_silo, quantita, ultimo_aggiornamento 
+                SELECT Cd_xMGSilo, Qta, ultimo_aggiornamento 
                 FROM {table_name} 
-                ORDER BY ultimo_aggiornamento DESC, id_silo
+                WHERE ultimo_aggiornamento >= DATEADD(HOUR, -?, GETDATE())
+                ORDER BY ultimo_aggiornamento DESC, Cd_xMGSilo
                 """
-                cursor.execute(sql)
+                cursor.execute(sql, (hours,))
             
-            results = cursor.fetchall()
+            results = cursor.fetchmany(limit)
             cursor.close()
             
             # Converte in lista di dict
             return [
                 {
-                    'id_silo': row[0],
-                    'quantita': row[1],
+                    'id_silo': row[0],           # Cd_xMGSilo (S01, S02, ecc.)
+                    'quantita': row[1],          # Qta
                     'ultimo_aggiornamento': row[2].strftime('%Y-%m-%d %H:%M:%S') if row[2] else None
                 }
                 for row in results
