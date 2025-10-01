@@ -1,36 +1,76 @@
-# .gitignore
+# === SICUREZZA - NON COMMITTARE MAI ===
+.env
+*.env
+config_local.json
+secrets/
+credentials/
 
-# Ambiente virtuale
-venv/
-.env/
-
-# File Python compilati
-__pycache__/
-*.pyc
-*.pyo
-
-# Log e output
-*.log
+# === LOG FILES ===
 LOG/
-server.log
-nohup.out
+logs/
+*.log
+*.log.*
 
-# File editor temporanei
+# === DATABASE ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# === VIRTUAL ENVIRONMENT ===
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# === IDE ===
+.vscode/
+.idea/
 *.swp
 *.swo
-*.bak
-*.tmp
+*~
 
-# Build Python
-build/
-dist/
-*.egg-info/
-
-# File di sistema
+# === OS ===
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# DB Connection
-secret.key
-config.json
+# === TEMPORARY FILES ===
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
 
+# === CONFIG BACKUPS (potrebbero contenere password) ===
+config.json.bak
+config_backup_*

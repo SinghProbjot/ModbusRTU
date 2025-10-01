@@ -25,14 +25,14 @@ client = ModbusSerialClient(
 
 # === AVVIO CONNESSIONE ===
 if not client.connect():
-    logging.error("❌ Impossibile connettersi a /dev/ttyUSB0. Verifica collegamento e permessi.")
+    logging.error(" Impossibile connettersi a /dev/ttyUSB0. Verifica collegamento e permessi.")
     exit(1)
 
-logging.info("🔁 Inizio polling Modbus RTU da slave 1 a 16.")
+logging.info(" Inizio polling Modbus RTU da slave 1 a 16.")
 
 try:
     for slave_id in range(1, 16):
-        logging.info(f"📡 Polling slave ID {slave_id}...")
+        logging.info(f" Polling slave ID {slave_id}...")
 
         try:
             response = client.read_holding_registers(
@@ -43,12 +43,12 @@ try:
 
             if hasattr(response, 'registers'):
                 value = response.registers[0]
-                logging.info(f"✅ Slave {slave_id} → Registro 10 = {value}")
+                logging.info(f" Slave {slave_id} → Registro 10 = {value}")
             else:
-                logging.warning(f"⚠️  Slave {slave_id} ha risposto ma senza registri.")
+                logging.warning(f"  Slave {slave_id} ha risposto ma senza registri.")
 
         except Exception as e:
-            logging.error(f"❌ Slave {slave_id} → Errore o timeout: {e}")
+            logging.error(f" Slave {slave_id} → Errore o timeout: {e}")
 
         time.sleep(0.1)  # evita di saturare il bus
 

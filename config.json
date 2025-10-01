@@ -1,0 +1,56 @@
+{
+  "modbus": {
+    "serial_port": "/dev/ttyUSB0",
+    "baudrate": 115200,
+    "bytesize": 8,
+    "parity": "E",
+    "stopbits": 1,
+    "timeout": 1.0
+  },
+  "polling": {
+    "interval_seconds": 60,
+    "slave_delay_seconds": 0.05,
+    "max_retries": 3,
+    "slaves": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  },
+  "validation": {
+    "min_value": 0,
+    "max_value": 28000
+  },
+  "flask": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": false
+  },
+  "logging": {
+    "log_dir": "LOG",
+    "log_file": "modbus_polling.log",
+    "max_bytes": 5242880,
+    "backup_count": 5,
+    "level": "INFO"
+  },
+  "database": {
+    "enabled": true,
+    "type": "sqlserver",
+    "host": "10.1.8.252",
+    "port": 1433,
+    "database": "MIP_IMPEXP",
+    "instance": "SQL2022",
+    "username_env": "SQLSERVER_USERNAME",
+    "password_env": "SQLSERVER_PASSWORD",
+    "table_name": "silo_monitoring",
+    "driver": "ODBC Driver 18 for SQL Server",
+    "connection_pool_size": 5,
+    "write_interval_seconds": 120,
+    "batch_size": 15
+  },
+  "alerts": {
+    "enabled": false,
+    "offline_threshold_minutes": 5,
+    "telegram": {
+      "bot_token_env": "TELEGRAM_BOT_TOKEN",
+      "chat_id_env": "TELEGRAM_CHAT_ID",
+      "alert_cooldown_minutes": 15
+    }
+  }
+}
