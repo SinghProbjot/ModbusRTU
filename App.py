@@ -36,7 +36,7 @@ except Exception as e:
 # === BANNER DI AVVIO ===
 print(f"""
 ==============================================================================================
-🛰️ MODBUS RTU SILO MONITORING DASHBOARD
+MODBUS RTU SILO MONITORING DASHBOARD
 ==============================================================================================
 Author      : Probjot Singh
 Version     : 3.1.0
