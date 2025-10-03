@@ -16,7 +16,7 @@
 ---
 
 
-# 🏗️ Modbus RTU Comunication and Silo Dashboard
+# Modbus RTU Comunication and Silo Dashboard
 
 A Python-based application for **polling silo data via Modbus RTU** and displaying the values in **real-time through a web-based dashboard**.
 
@@ -24,7 +24,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ---
 
-## 📸 Preview
+## Preview
 
 ![Dashboard Preview](old_files/silosdashboard.JPG)
 
@@ -32,26 +32,25 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ## ⚙️ Features
 
-- 🔄 Polls 16 Modbus RTU slave devices every 3 minutes *(customizable)*
-- ✅ Validates and logs readings from each slave (register 10)
-- 📊 Real-time dashboard showing:
+- Polls 16 Modbus RTU slave devices every 3 minutes *(customizable)*
+- Validates and logs readings from each slave (register 10)
+- Real-time dashboard showing:
   - Quantity
   - Fill percentage (visual)
   - Device status (online/offline)
   - Last successful reading timestamp
-- 🌈 Color-coded silo fill levels:
+- Color-coded silo fill levels:
   - 🟢 Green: >50%
   - 🟡 Yellow: 20–50%
   - 🔴 Red: <20%
-- 🪵 Logging to file + console with timestamps
-- 🧩 Modular design, ready for future extensions (e.g. DB integration)
-- 💻 Accessible from other devices on the network (Flask runs on `0.0.0.0`)
+- Logging to file + console with timestamps
+- Modular design, ready for future extensions (e.g. DB integration)
+- Accessible from other devices on the network (Flask runs on `0.0.0.0`)
 
 ---
 
 ## 🧱 Architecture
 ````
-<pre lang="markdown"><code>```
 .
 ├── App.py # Main application (Flask + Modbus polling)
 ├── templates/
@@ -59,8 +58,6 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 ├── LOG/ # Rotated log files (polling history)
 ├── update.sh # Git pull + auto-restart (optional)
 └── README.md
-</code>
-```
 ````
 
 ---
@@ -74,7 +71,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 - Register read: Holding Register at address `10`
 - Slaves: `1` to `15`
 
-> 🧪 Each polling loop includes a short delay between requests to avoid overload.
+> Each polling loop includes a short delay between requests to avoid overload.
 
 ---
 
@@ -83,7 +80,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 Access the live dashboard from any device in the same network:
     http://<server-ip>:5000
 
-### 🖼️ Silo UI
+###  Silo UI
 
 Each silo includes:
 
@@ -95,7 +92,7 @@ Each silo includes:
 
 ---
 
-## 🪵 Logging
+## Logging
 
 - File: `LOG/modbus_polling-YYYYMMDD.log`
 - Rotated daily (auto-created by the app)
@@ -107,7 +104,7 @@ Each silo includes:
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ### 1. Install Python environment
 
@@ -131,17 +128,17 @@ python3 App.py
 ```
 Or expose via gunicorn and systemd for production.
 
-## 🚀 Future Features (WIP)
+## Future Features
 
-- 🗃️ Write valid readings to Microsoft SQL Server (DB integration)
+- Write valid readings to Microsoft SQL Server (DB integration)
 
-- 📈 Historical graph and data export
+- Historical graph and data export
 
-- 🖲️ Dashboard controls: manual update, diagnostics, etc.
+- Dashboard controls: manual update, diagnostics, etc.
 
-- 🔐 Authenticated access (optional)
+- Authenticated access (optional)
 
-## 🧑‍💻 Developer Notes
+## Developer Notes
 
 - All data is stored in RAM (silo_data dictionary)
 
@@ -153,7 +150,7 @@ Or expose via gunicorn and systemd for production.
 
 - Safe multithreading with shared silo_data state
 
-## 📁 Version Control / Deployment
+## Version Control / Deployment
 
 - Git repo is safe for regular updates (venv/, LOG/, etc. are ignored via .gitignore)
 
@@ -170,7 +167,7 @@ Or expose via gunicorn and systemd for production.
     - modbus-updater.service + timer (hourly git sync)
 
 
-## ✍️ Author
+## Author
 
 Developed with ❤️ by Probjot Singh
 
