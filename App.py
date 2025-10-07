@@ -447,11 +447,25 @@ def api_stats():
 @app.route("/api/history/<int:slave_id>")
 def api_history(slave_id):
     """API per storico dati di un slave"""
-    points = request.args.get('points', type=int)
     if slave_id not in data_manager.slaves:
         return jsonify({"error": "Slave ID non valido"}), 400
-    history = data_manager.get_history(slave_id, points)
-    return jsonify(history)
+    
+    points = request.args.get('points', type=int, default=100)
+    hours = request.args.get('hours', type=int, default=24)
+    
+    try:
+        # Se il database è abilitato, leggi da lì
+        if data_manager.db_manager:
+            history_data = data_manager.db_manager.get_recent_data(slave_id, hours, points)
+        else:
+            # Fallback allo storico in memoria
+            history_data = data_manager.get_history(slave_id, points)
+        
+        return jsonify(history_data)
+        
+    except Exception as e:
+        logger.error(f" Errore API history per slave {slave_id}: {e}")
+        return jsonify({"error": "Errore interno del server"}), 500
 
 @app.route("/api/database")
 def api_database():

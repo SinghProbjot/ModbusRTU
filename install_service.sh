@@ -1,60 +1,79 @@
 #!/bin/bash
 
-# Script di installazione automatica per Modbus Silo Service
-# Configurato per: utente=serverubuntu, cartella=ModbusRTU
+set -e
 
-set -e  # Exit on error
-
-# Configurazioni
 SERVICE_NAME="modbussilo"
 USER_NAME="serverubuntu"
-APP_DIR="/home/$USER_NAME/ModbusRTU"
+APP_DIR="/home/serverubuntu/fromPC/ModbusRTU"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-VENV_PATH="$APP_DIR/venv"
 
 echo "=================================================================="
-echo "  INSTALLAZIONE AUTOMATICA MODBUS SILO SERVICE"
+echo "🛠️  INSTALLAZIONE SERVIZIO MODBUS SILO CON GUNICORN"
 echo "=================================================================="
-echo "Utente: $USER_NAME"
 echo "Directory: $APP_DIR"
 echo "Servizio: $SERVICE_NAME"
 echo "=================================================================="
 
-# Verifica che l'utente esista
-if ! id "$USER_NAME" &>/dev/null; then
-    echo " ERRORE: Utente $USER_NAME non trovato!"
-    exit 1
-fi
-
-# Verifica che la directory esista
+# Verifiche
 if [ ! -d "$APP_DIR" ]; then
-    echo " ERRORE: Directory $APP_DIR non trovata!"
-    echo "   Assicurati che il progetto sia in $APP_DIR"
+    echo "❌ ERRORE: Directory $APP_DIR non trovata!"
     exit 1
 fi
 
-# Verifica che app.py esista
 if [ ! -f "$APP_DIR/App.py" ]; then
-    echo " ERRORE: App.py non trovato in $APP_DIR!"
+    echo "❌ ERRORE: app.py non trovato in $APP_DIR!"
     exit 1
 fi
 
-# Verifica che il virtual environment esista
-if [ ! -f "$VENV_PATH/bin/activate" ]; then
-    echo " ERRORE: Virtual environment non trovato in $VENV_PATH!"
-    echo "   Crea il virtual environment con: python3 -m venv venv"
-    exit 1
+# Crea wsgi.py se non esiste
+if [ ! -f "$APP_DIR/wsgi.py" ]; then
+    echo "📄 Creazione wsgi.py..."
+    cat > "$APP_DIR/wsgi.py" << 'EOF'
+#!/usr/bin/env python3
+"""
+WSGI entry point for Modbus Silo Monitoring
+Production-ready with Gunicorn
+"""
+
+import os
+import sys
+import time
+
+# Aggiungi la directory del progetto al path
+project_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_dir)
+
+# Imposta timezone Europe/Rome
+os.environ['TZ'] = 'Europe/Rome'
+try:
+    time.tzset()
+except:
+    pass  # Su alcuni sistemi non disponibile
+
+from app import app, data_manager, stop_event
+
+if __name__ == "__main__":
+    # Solo per sviluppo
+    app.run()
+EOF
+    echo "✅ wsgi.py creato"
 fi
 
-# Verifica che .env esista
-if [ ! -f "$APP_DIR/.env" ]; then
-    echo "  AVVISO: File .env non trovato, assicurati di crearlo"
+# Installa Gunicorn se non presente
+if [ ! -f "$APP_DIR/venv/bin/gunicorn" ]; then
+    echo "📦 Installazione Gunicorn..."
+    cd "$APP_DIR"
+    source venv/bin/activate
+    pip install gunicorn
+    deactivate
+    echo "✅ Gunicorn installato"
 fi
 
-echo " Configurazione verificata con successo"
+# Crea directory LOG se non esiste
+mkdir -p "$APP_DIR/LOG"
 
-# Crea il file di servizio systemd
-echo " Creazione file servizio systemd..."
+# Crea file di servizio
+echo "📁 Creazione servizio systemd..."
 sudo tee $SERVICE_FILE > /dev/null <<EOF
 [Unit]
 Description=Modbus Silo Monitoring Dashboard
@@ -66,92 +85,92 @@ Type=simple
 User=$USER_NAME
 Group=$USER_NAME
 WorkingDirectory=$APP_DIR
-
-# Carica le variabili ambiente dal file .env
 EnvironmentFile=$APP_DIR/.env
-
-# Script che attiva il venv e lancia l'app
-ExecStart=/bin/bash -c 'source $VENV_PATH/bin/activate && exec python3 $APP_DIR/App.py'
-
-# Politica di restart
+ExecStart=$APP_DIR/venv/bin/gunicorn \\
+    --bind 0.0.0.0:5000 \\
+    --workers 2 \\
+    --threads 4 \\
+    --worker-class gthread \\
+    --timeout 60 \\
+    --preload \\
+    --access-logfile $APP_DIR/LOG/gunicorn_access.log \\
+    --error-logfile $APP_DIR/LOG/gunicorn_error.log \\
+    --capture-output \\
+    --log-level info \\
+    wsgi:app
 Restart=always
 RestartSec=10
-
-# Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=$SERVICE_NAME
-
-# Sicurezza
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=yes
 ReadWritePaths=$APP_DIR/LOG
-ReadWritePaths=$APP_DIR
-
-# Ambiente
-Environment=PATH=$VENV_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=PATH=$APP_DIR/venv/bin
 Environment=PYTHONPATH=$APP_DIR
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-echo " File servizio creato: $SERVICE_FILE"
+echo "✅ File servizio creato: $SERVICE_FILE"
 
-# Imposta i permessi corretti
-echo " Impostazione permessi..."
+# Imposta permessi
 sudo chmod 644 $SERVICE_FILE
 sudo chown root:root $SERVICE_FILE
 
 # Ricarica systemd
-echo " Ricarica configurazione systemd..."
+echo "🔄 Ricarica systemd..."
 sudo systemctl daemon-reload
 
-# Abilita il servizio
-echo "  Abilitazione servizio..."
+# Abilita e avvia servizio
+echo "⚙️  Abilitazione servizio..."
 sudo systemctl enable $SERVICE_NAME
 
-# Avvia il servizio
-echo " Avvio servizio..."
+echo "🚀 Avvio servizio..."
 sudo systemctl start $SERVICE_NAME
 
-# Aspetta un attimo e verifica lo stato
-sleep 3
-
+# Verifica
+sleep 5
 echo "=================================================================="
-echo " VERIFICA INSTALLAZIONE"
+echo "📊 VERIFICA INSTALLAZIONE"
 echo "=================================================================="
 
-# Verifica lo stato del servizio
 if sudo systemctl is-active --quiet $SERVICE_NAME; then
-    echo " SERVIZIO ATTIVO E FUNZIONANTE"
+    echo "✅ SERVIZIO ATTIVO E FUNZIONANTE"
+    
+    # Test health check
+    echo "🌐 Test health check..."
+    if curl -s http://localhost:5000/health > /dev/null; then
+        echo "✅ Health check OK"
+    else
+        echo "❌ Health check fallito"
+    fi
 else
-    echo " IL SERVIZIO NON È ATTIVO"
-    echo "   Controlla i log con: sudo journalctl -u $SERVICE_NAME"
+    echo "❌ IL SERVIZIO NON È ATTIVO"
 fi
 
-# Mostra lo stato
 echo ""
-echo " STATO SERVIZIO:"
-sudo systemctl status $SERVICE_NAME --no-pager -l
+echo "📋 STATO SERVIZIO:"
+sudo systemctl status $SERVICE_NAME --no-pager -l | head -10
 
 echo ""
 echo "=================================================================="
-echo " INSTALLAZIONE COMPLETATA!"
+echo "🎉 INSTALLAZIONE COMPLETATA!"
 echo "=================================================================="
 echo ""
-echo " COMANDI UTILI:"
+echo "📋 COMANDI UTILI:"
 echo "   Stato servizio:    sudo systemctl status $SERVICE_NAME"
+echo "   Log in tempo reale: sudo journalctl -u $SERVICE_NAME -f"
+echo "   Riavvio graceful:  sudo systemctl reload $SERVICE_NAME"
 echo "   Ferma servizio:    sudo systemctl stop $SERVICE_NAME"
 echo "   Avvia servizio:    sudo systemctl start $SERVICE_NAME"
-echo "   Riavvia servizio:  sudo systemctl restart $SERVICE_NAME"
-echo "   Log in tempo reale: sudo journalctl -u $SERVICE_NAME -f"
-echo "   Ultimi 100 log:    sudo journalctl -u $SERVICE_NAME -n 100"
 echo ""
-echo " VERIFICHE POST-INSTALLAZIONE:"
-echo "   1. Il servizio si avvia al boot: sudo systemctl is-enabled $SERVICE_NAME"
-echo "   2. Controlla i log per errori: sudo journalctl -u $SERVICE_NAME --since '1 hour ago'"
-echo "   3. Testa il riavvio: sudo systemctl restart $SERVICE_NAME && sleep 5 && sudo systemctl status $SERVICE_NAME"
+echo "📊 LOG GUNICORN:"
+echo "   Access log:        tail -f $APP_DIR/LOG/gunicorn_access.log"
+echo "   Error log:         tail -f $APP_DIR/LOG/gunicorn_error.log"
 echo ""
+echo "🌐 TEST APPLICAZIONE:"
+echo "   Health check:      curl http://localhost:5000/health"
+echo "   Dashboard:         http://localhost:5000"
+echo "   API dati:          curl http://localhost:5000/api/data"
+echo "=================================================================="

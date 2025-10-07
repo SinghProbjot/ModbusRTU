@@ -293,7 +293,8 @@ class DatabaseManager:
                 {
                     'id_silo': row[0],           # Cd_xMGSilo (S01, S02, ecc.)
                     'quantita': row[1],          # Qta
-                    'ultimo_aggiornamento': row[2].strftime('%Y-%m-%d %H:%M:%S') if row[2] else None
+                    'ultimo_aggiornamento': row[2].strftime('%Y-%m-%d %H:%M:%S') if row[2] else None,
+                    'timestamp': row[2].timestamp() if row[2] else None  # Per i grafici
                 }
                 for row in results
             ]
