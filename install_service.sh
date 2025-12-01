@@ -8,7 +8,7 @@ APP_DIR="/home/serverubuntu/fromPC/ModbusRTU"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 echo "=================================================================="
-echo "🛠️  INSTALLAZIONE SERVIZIO MODBUS SILO CON GUNICORN"
+echo "  INSTALLAZIONE SERVIZIO MODBUS SILO CON GUNICORN"
 echo "=================================================================="
 echo "Directory: $APP_DIR"
 echo "Servizio: $SERVICE_NAME"
@@ -16,18 +16,18 @@ echo "=================================================================="
 
 # Verifiche
 if [ ! -d "$APP_DIR" ]; then
-    echo "❌ ERRORE: Directory $APP_DIR non trovata!"
+    echo " ERRORE: Directory $APP_DIR non trovata!"
     exit 1
 fi
 
 if [ ! -f "$APP_DIR/App.py" ]; then
-    echo "❌ ERRORE: app.py non trovato in $APP_DIR!"
+    echo " ERRORE: app.py non trovato in $APP_DIR!"
     exit 1
 fi
 
 # Crea wsgi.py se non esiste
 if [ ! -f "$APP_DIR/wsgi.py" ]; then
-    echo "📄 Creazione wsgi.py..."
+    echo " Creazione wsgi.py..."
     cat > "$APP_DIR/wsgi.py" << 'EOF'
 #!/usr/bin/env python3
 """
@@ -56,24 +56,24 @@ if __name__ == "__main__":
     # Solo per sviluppo
     app.run()
 EOF
-    echo "✅ wsgi.py creato"
+    echo " wsgi.py creato"
 fi
 
 # Installa Gunicorn se non presente
 if [ ! -f "$APP_DIR/venv/bin/gunicorn" ]; then
-    echo "📦 Installazione Gunicorn..."
+    echo " Installazione Gunicorn..."
     cd "$APP_DIR"
     source venv/bin/activate
     pip install gunicorn
     deactivate
-    echo "✅ Gunicorn installato"
+    echo " Gunicorn installato"
 fi
 
 # Crea directory LOG se non esiste
 mkdir -p "$APP_DIR/LOG"
 
 # Crea file di servizio
-echo "📁 Creazione servizio systemd..."
+echo " Creazione servizio systemd..."
 sudo tee $SERVICE_FILE > /dev/null <<EOF
 [Unit]
 Description=Modbus Silo Monitoring Dashboard
@@ -112,64 +112,64 @@ Environment=PYTHONPATH=$APP_DIR
 WantedBy=multi-user.target
 EOF
 
-echo "✅ File servizio creato: $SERVICE_FILE"
+echo " File servizio creato: $SERVICE_FILE"
 
 # Imposta permessi
 sudo chmod 644 $SERVICE_FILE
 sudo chown root:root $SERVICE_FILE
 
 # Ricarica systemd
-echo "🔄 Ricarica systemd..."
+echo " Ricarica systemd..."
 sudo systemctl daemon-reload
 
 # Abilita e avvia servizio
-echo "⚙️  Abilitazione servizio..."
+echo "  Abilitazione servizio..."
 sudo systemctl enable $SERVICE_NAME
 
-echo "🚀 Avvio servizio..."
+echo " Avvio servizio..."
 sudo systemctl start $SERVICE_NAME
 
 # Verifica
 sleep 5
 echo "=================================================================="
-echo "📊 VERIFICA INSTALLAZIONE"
+echo " VERIFICA INSTALLAZIONE"
 echo "=================================================================="
 
 if sudo systemctl is-active --quiet $SERVICE_NAME; then
-    echo "✅ SERVIZIO ATTIVO E FUNZIONANTE"
+    echo " SERVIZIO ATTIVO E FUNZIONANTE"
     
     # Test health check
-    echo "🌐 Test health check..."
+    echo " Test health check..."
     if curl -s http://localhost:5000/health > /dev/null; then
-        echo "✅ Health check OK"
+        echo " Health check OK"
     else
-        echo "❌ Health check fallito"
+        echo " Health check fallito"
     fi
 else
-    echo "❌ IL SERVIZIO NON È ATTIVO"
+    echo " IL SERVIZIO NON È ATTIVO"
 fi
 
 echo ""
-echo "📋 STATO SERVIZIO:"
+echo " STATO SERVIZIO:"
 sudo systemctl status $SERVICE_NAME --no-pager -l | head -10
 
 echo ""
 echo "=================================================================="
-echo "🎉 INSTALLAZIONE COMPLETATA!"
+echo " INSTALLAZIONE COMPLETATA!"
 echo "=================================================================="
 echo ""
-echo "📋 COMANDI UTILI:"
+echo " COMANDI UTILI:"
 echo "   Stato servizio:    sudo systemctl status $SERVICE_NAME"
 echo "   Log in tempo reale: sudo journalctl -u $SERVICE_NAME -f"
 echo "   Riavvio graceful:  sudo systemctl reload $SERVICE_NAME"
 echo "   Ferma servizio:    sudo systemctl stop $SERVICE_NAME"
 echo "   Avvia servizio:    sudo systemctl start $SERVICE_NAME"
 echo ""
-echo "📊 LOG GUNICORN:"
+echo " LOG GUNICORN:"
 echo "   Access log:        tail -f $APP_DIR/LOG/gunicorn_access.log"
 echo "   Error log:         tail -f $APP_DIR/LOG/gunicorn_error.log"
 echo ""
-echo "🌐 TEST APPLICAZIONE:"
+echo " TEST APPLICAZIONE:"
 echo "   Health check:      curl http://localhost:5000/health"
 echo "   Dashboard:         http://localhost:5000"
 echo "   API dati:          curl http://localhost:5000/api/data"

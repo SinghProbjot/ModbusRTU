@@ -30,7 +30,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ---
 
-## ⚙️ Features
+## Features
 
 - Polls 16 Modbus RTU slave devices every 3 minutes *(customizable)*
 - Validates and logs readings from each slave (register 10)
@@ -49,7 +49,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ---
 
-## 🧱 Architecture
+## Architecture
 ````
 .
 ├── App.py # Main application (Flask + Modbus polling)
@@ -62,7 +62,7 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ---
 
-## 🔌 Modbus RTU Configuration
+## Modbus RTU Configuration
 
 - Port: `/dev/ttyUSB0`
 - Baudrate: `115200`
@@ -75,12 +75,12 @@ Built for industrial environments with multiple Modbus slave devices, this syste
 
 ---
 
-## 🌐 Web Dashboard
+## Web Dashboard
 
 Access the live dashboard from any device in the same network:
     http://<server-ip>:5000
 
-###  Silo UI
+### Silo UI
 
 Each silo includes:
 
